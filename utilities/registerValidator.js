@@ -1,10 +1,11 @@
 const Joi = require('joi')
+const checkNumber = Joi.extend(require('joi-phone-number'))
 
 const registerValidator = Joi.object({
     firstName : Joi.string().alphanum().required(),
     lastName : Joi.string(),
-    phoneNumber: Joi.string().phoneNumber(),
-    email: Joi.string().email({tlds:{allow:false}}).required(),
+    phoneNumber: checkNumber.string().phoneNumber({defaultCountry:'TN', format: 'rfc3966'}),
+    email: Joi.string().email().required(),
     password: Joi.string().required().min(4)
 })
 
