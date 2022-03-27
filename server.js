@@ -1,5 +1,6 @@
 const express = require('express')
 const mongoose = require('mongoose')
+const cors = require('cors')
 require('dotenv').config()
 
 const userRouter = require('./routes/users')
@@ -8,8 +9,23 @@ const userRouter = require('./routes/users')
 const app = express()
 
 app.use(express.json())
-app.use('/auth', userRouter)
+app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
+app.use('/auth', userRouter)
+const TRAVELPLAN =[
+    {
+    _id:"1",
+    name:"Hammamet"
+    },
+    {
+        _id:"1",
+        name:"Paris"
+    }
+    
+]
+app.get('/travelPlan',(req,res)=>{
+    return res.json(TRAVELPLAN)
+})
 
 app.get('/', (req,res)=>{
     res.json({message: "Welcome to My application FunToDo "})
