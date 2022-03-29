@@ -18,12 +18,12 @@ const TRAVELPLAN =[
     name:"Hammamet"
     },
     {
-        _id:"1",
+        _id:"2",
         name:"Paris"
     }
     
 ]
-app.get('/travelPlan',(req,res)=>{
+app.get('/travelplan',(req,res)=>{
     return res.json(TRAVELPLAN)
 })
 
