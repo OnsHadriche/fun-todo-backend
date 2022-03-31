@@ -11,7 +11,7 @@ const app = express()
 app.use(express.json())
 app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
-app.use('/auth', userRouter)
+app.use('/users', userRouter)
 const TRAVELPLAN =[
     {
     _id:"1",
