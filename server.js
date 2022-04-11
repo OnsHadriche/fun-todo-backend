@@ -4,6 +4,7 @@ const cors = require('cors')
 require('dotenv').config()
 
 const userRouter = require('./routes/users')
+const packageRouter = require('./routes/packages')
 
 
 const app = express()
@@ -12,6 +13,7 @@ app.use(express.json())
 app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
 app.use('/auth', userRouter)
+app.use('/packages', packageRouter)
 
 const TRAVELPLAN =[
     {
