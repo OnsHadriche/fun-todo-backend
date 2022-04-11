@@ -36,5 +36,6 @@ module.exports ={
     registerValidator,
     loginValidator,
     resetValidator,
-    forgetPasswordValidator
+    forgetPasswordValidator,
+    pakageValidator
 }
