@@ -1,23 +1,23 @@
 const Package = require("../models/Package");
 const { packageValidator } = require("../utilities/validators");
-//get all packages 
+//get all packages
 const getAllPackages = async (req, res) => {
   try {
     const package = await Package.find();
-    res.status.json({ package });
+    res.status(201).json({ package });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 //find packages by country
 const getPackages = async (req, res) => {
-    try {
-      const packages = await Package.findOne(req.body.country);
-      res.status.json({ packages });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  };
+  try {
+    const packages = await Package.findOne({ country: req.body.country });
+    res.status(201).json({ packages });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const getOnePackage = async (req, res) => {
   try {
     const { id } = req.params.id;
@@ -61,8 +61,9 @@ const updatePackage = async (req, res) => {
       return res.status(400).json(validationResult);
     }
     const package = await Package.findByIdAndUpdate(
-      packageToUpdateId,
-      req.body
+      { _id: packageToUpdateId },
+      { $set: req.body },
+      { new: true }
     );
     if (!package) {
       return res.status(404).json({ error: "Package not found" });
@@ -81,5 +82,5 @@ module.exports = {
   getPackages,
   getOnePackage,
   createPackage,
-  updatePackage
+  updatePackage,
 };
