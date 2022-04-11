@@ -11,7 +11,8 @@ const app = express()
 app.use(express.json())
 app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
-app.use('/users', userRouter)
+app.use('/auth', userRouter)
+
 const TRAVELPLAN =[
     {
     _id:"1",
@@ -25,9 +26,11 @@ const TRAVELPLAN =[
 ]
 app.get('/travelplan',(req,res)=>{
     return res.json(TRAVELPLAN)
+   
 })
 
 app.get('/', (req,res)=>{
+   
     res.json({message: "Welcome to My application FunToDo "})
 })
 
