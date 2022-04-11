@@ -23,7 +23,7 @@ const resetValidator =Joi.object({
  })
  //Pakage
 
- const pakageValidator = Joi.object({
+ const packageValidator = Joi.object({
     title: Joi.string().required().min(2).max(70),
     details: Joi.string(),
     photo: Joi.string(),
@@ -37,5 +37,5 @@ module.exports ={
     loginValidator,
     resetValidator,
     forgetPasswordValidator,
-    pakageValidator
+    packageValidator
 }

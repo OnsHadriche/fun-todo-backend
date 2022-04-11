@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-const pakageSchema = mongoose.Schema({
+const packageSchema = mongoose.Schema({
     photo: {
         type: String
     },
@@ -22,4 +22,4 @@ const pakageSchema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Pakage', pakageSchema)
+module.exports = mongoose.model('Pakage', packageSchema)
