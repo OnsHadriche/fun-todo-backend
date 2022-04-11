@@ -21,3 +21,5 @@ const pakageSchema = mongoose.Schema({
         type:String
     }
 })
+
+module.exports = mongoose.model('Pakage', pakageSchema)
