@@ -22,4 +22,4 @@ const packageSchema = mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Pakage', packageSchema)
+module.exports = mongoose.model('Package', packageSchema)
