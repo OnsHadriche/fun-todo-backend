@@ -32,6 +32,7 @@ const resetValidator =Joi.object({
 
 });
 
+
 module.exports ={
     registerValidator,
     loginValidator,
