@@ -3,7 +3,8 @@ const mongoose = require('mongoose')
 
 const packageSchema = mongoose.Schema({
     photo: {
-        type: String
+        type: String,
+        default:' '
     },
     title:{
         type:String,
