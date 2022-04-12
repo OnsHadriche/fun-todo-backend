@@ -10,6 +10,7 @@ const pageSchema = mongoose.Schema({
   },
   photo: {
     type: String,
+    default:''
   },
   contact: {
     type: Number,
