@@ -1,22 +1,28 @@
 //Password handle
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
-const transporter = require('../utilities/sendEmail')
+const transporter = require("../utilities/sendEmail");
+
 
 // mongoose user model
 const User = require("../models/User");
-const {registerValidator,loginValidator} = require("../utilities/validators");
 
+const {
+  registerValidator,
+  loginValidator,
+  resetValidator,
+  forgetPasswordValidator,
+} = require("../utilities/validators");
 
 //Get all users
-const getAllUsers = async (req,res)=>{
+const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find()
-    res.status(200).json({users})
+    const users = await User.find();
+    res.status(200).json({ users });
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
 //Register User
 const register = async (req, res) => {
   try {
@@ -30,8 +36,8 @@ const register = async (req, res) => {
       const userExist = await User.findOne({ email });
       if (userExist) {
         res
-        .status(401)
-        .json({ message: "An account with this email exists already" });
+          .status(401)
+          .json({ error: "An account with this email exists already" });
         return;
       }
       const salt = await bcrypt.genSalt(10);
@@ -57,7 +63,7 @@ const login = async (req, res) => {
       abortEarly: false,
     });
     if (validatorResult.error) {
-      res.status(400).json({ result: validatorResult });
+      res.status(400).json({ result: validatorResult.error });
       return;
     }
     const { email, password } = req.body;
@@ -89,46 +95,85 @@ const login = async (req, res) => {
 };
 const forgetPassword = async (req, res) => {
   try {
-    const {email}= req.body
-    const existUser = await User.findOne({email})
-    if(!existUser){
-      return res.status(400).json({error: 'User with this email does not exists. '})
-  
+    const validatorResult = forgetPasswordValidator.validate(req.body, {
+      abortEarly: false,
+    });
+    if (validatorResult.error) {
+      res.status(400).json({ result: validatorResult });
+      return;
     }
-    const token = JWT.sign({ userId: existUser._id, email: email}, process.env.RESET_KEY,{expiresIn:'24h'})
-    const data ={
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "User with this email does not exists. " });
+    }
+    const token = JWT.sign({ id: user._id }, process.env.RESET_KEY, {
+      expiresIn: "4h",
+    });
+    await new Token({
+      userId: user._id,
+      token: token,
+    }).save();
+    const link = `http://localhost:${process.env.PORT}/auth/reset/${user._id}/${token}`;
+    const data = {
       from: process.env.HOST,
-      to:email,
-      subject:"Account activation link",
-      html:`
+      to: email,
+      subject: "Account activation link",
+      html: `
       <h2>Please click the given link to reset your password </h2>
-      <p>http://localhost:5000/auth/reset_password/${existUser._id}/${token}</p>`
-    } 
-    transporter.sendMail(data, err=>{
-      if(err){
-       return res.status(400).json({
-         error: err.message
-       })
+      <p> ${link} </p>`,
+    };
+    transporter.sendMail(data, (err) => {
+      if (err) {
+        return res.status(400).json({
+          error: err.message,
+        });
       }
-
       res.status(200).json({
-        message: 'email send successfully',
-        existUser,
-        resetLink: token
-      })
-    })
+        message: "email send successfully",
+        user,
+        token: token,
+      });
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-
-
+// Reset_password
+const resetPassword = async (req, res) => {
+  try {
+    const password = req.body.password
+    const userToupadateId = req.params.id;
+    const validatorResult = resetValidator.validate(req.body, {
+      abortEarly: false,
+    });
+    if (validatorResult.error) {
+      res.status(400).json(validatorResult);
+      return;
+    }
+    const salt = await bcrypt.genSalt(10);
+    const newPasswordHash = await bcrypt.hash(password, salt);
+    const user = await User.updateOne(
+      { _id: userToupadateId },
+      { $set: { password: newPasswordHash } },
+      { new: true }
+    );
+    res.status(201).json({
+      message: "Password updated successfully",
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 module.exports = {
   register,
   login,
-  reset_password,
+  resetPassword,
   forgetPassword,
-  getAllUsers
+  getAllUsers,
 };
