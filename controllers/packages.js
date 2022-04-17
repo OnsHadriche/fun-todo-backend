@@ -36,17 +36,26 @@ const createPackage = async (req, res) => {
       abortEarly: false,
     });
     if (validationResult.error) {
-      res.status(400).json(validationResult);
+       res.status(400).json(validationResult);
+    } else {
+      const {photo, title, price,country,details} = req.body
+      const pack = new Package({
+        photo: photo,
+        title: title,
+        price: price,
+        country: country,
+        details: details,
+        
+      });
+      
+      let savedPack = await pack.save();
+      console.log(savedPack)
+      res.status(201).json({ 
+          message: "Package created successfully", 
+          pack: savedPack,
+        });
     }
-    const { photo, title, price, details, country } = req.body;
-    await new Package({
-      photo: photo,
-      title: title,
-      price: price,
-      details: details,
-      country: country,
-    }).save();
-    res.status(201).json({ message: "Package created successfully" });
+  
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -76,6 +85,18 @@ const updatePackage = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+ const deletePackage = async(req,res)=>{
+   try {
+     const packId = req.params.id
+     const deletePack = await Package.findByIdAndRemove(packId)
+     if(!deletePack){
+       return res.status(404).json({error:'package not founded'})
+     }
+     res.status(201).json({message:'the package is deleted succssfully '})
+   } catch (error) {
+    res.status(500).json({ error: error.message });
+   }
+ }
 
 module.exports = {
   getAllPackages,
@@ -83,4 +104,5 @@ module.exports = {
   getOnePackage,
   createPackage,
   updatePackage,
+  deletePackage
 };
