@@ -57,13 +57,13 @@ const addNewAdmin = async (req, res) => {
       res.status(401).json({error:'Admin already existe'})
       return
     }
-    await PageEntreprise.updateOne(
+    const page = await PageEntreprise.findOneAndUpdate (
       { _id: req.params.id },
       { $push: { admins: [existingAdmin] } },
       { new: true }
      
     );
-    res.status(201).json({ message: "New admin added successfully" });
+    res.status(201).json({ message: "New admin added successfully", page });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -82,15 +82,30 @@ const getPageEntreprise = async (req, res) => {
     res
   }
 };
-module.exports = {
-  creatPageEntreprise,
-  addNewAdmin,
-  getPageEntreprise,
-};
-const removePageEntreprise = async(req,res)=>{
+const removeAdmin = async (req, res)=>{
   try {
     
+  } catch (error) {
+    
+  }
+}
+const removePageEntreprise = async(req,res)=>{
+  try {
+    const pageId = req.params.id
+    const pageEntreprise = await PageEntreprise.findByIdAndDelete(pageId)
+    if(!pageEntreprise){
+      res.status(404).json({error: 'Page not found'})
+      return;
+    }
+    res.status(201).json({massage: 'Page is deleted successfully'})
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
+module.exports = {
+  creatPageEntreprise,
+  addNewAdmin,
+  getPageEntreprise,
+  removePageEntreprise,
+  removeAdmin
+};
