@@ -16,9 +16,13 @@ const pageSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
-  user: {
+  master: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  admins: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  }],
 });
 module.exports = mongoose.model("PageEntreprise", pageSchema);
