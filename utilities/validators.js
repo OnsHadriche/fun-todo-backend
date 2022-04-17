@@ -17,13 +17,12 @@ const forgetPasswordValidator = Joi.object({
     email: Joi.string().email({ tlds: { allow: false } }).required()
 })
 const resetValidator =Joi.object({
-    email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().required()
 
  })
  //PageEntreprise
  const pageValidator = Joi.object({
-    title: Joi.string().required().min(2).max(70),
+    title: Joi.string().required().min(2),
     description: Joi.string(),
     photo: Joi.string(),
     contact: checkNumber.string().phoneNumber({defaultCountry:'TN', format: 'rfc3966'})
