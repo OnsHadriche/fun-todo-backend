@@ -63,7 +63,7 @@ const login = async (req, res) => {
       abortEarly: false,
     });
     if (validatorResult.error) {
-      res.status(400).json({ result: validatorResult.error });
+      res.status(400).json(validatorResult);
       return;
     }
     const { email, password } = req.body;
@@ -123,7 +123,7 @@ const forgetPassword = async (req, res) => {
       subject: "Account activation link",
       html: `
       <h2>Please click the given link to reset your password </h2>
-      <p> ${link} </p>`,
+      <p>  <a href='${link}' target='_blank'> Click here</a> </p>`,
     };
     transporter.sendMail(data, (err) => {
       if (err) {
@@ -156,7 +156,7 @@ const resetPassword = async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     const newPasswordHash = await bcrypt.hash(password, salt);
-    const user = await User.updateOne(
+    const user = await User.findByIdAndUpdate(
       { _id: userToupadateId },
       { $set: { password: newPasswordHash } },
       { new: true }
