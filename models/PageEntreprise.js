@@ -10,7 +10,7 @@ const pageSchema = mongoose.Schema({
   },
   photo: {
     type: String,
-    default:''
+    default: "",
   },
   contact: {
     type: Number,
@@ -21,8 +21,8 @@ const pageSchema = mongoose.Schema({
     ref: "User",
   },
   admins: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-  }],
+     type: mongoose.Schema.Types.ObjectId, 
+     ref: "User" 
+    }],
 });
 module.exports = mongoose.model("PageEntreprise", pageSchema);

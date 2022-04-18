@@ -7,5 +7,5 @@ router.get('/:id', getPageEntreprise)
 router.post('/', checkAuth,creatPageEntreprise)
 router.put('/:id',checkAuth,addNewAdmin)
 router.delete('/:id',checkAuth,removePageEntreprise)
-router.delete('/:id',checkAuth, removeAdmin)
+router.put('/delete/:id',checkAuth, removeAdmin)
  module.exports = router

@@ -1,4 +1,3 @@
-const { ObjectId } = require("mongodb");
 const mongoose = require("mongoose");
 const PageEntreprise = require("../models/PageEntreprise");
 const User = require("../models/User");
@@ -43,27 +42,70 @@ const creatPageEntreprise = async (req, res) => {
 };
 const addNewAdmin = async (req, res) => {
   try {
-    const existingPage = await PageEntreprise.findById(req.params.id);
-    const pageAdmins = existingPage.admins
-    const existingUser = await User.findById(req.body.id)
-    if(!existingUser){
-      res.status(404).json({error: 'User not found'})
+    const userId = mongoose.Types.ObjectId(req.body.id)
+    const existingUser = await User.findById(userId);
+    if (!existingUser ) {
+      res.status(404).json({ error: "User not found" });
       return;
     }
-    console.log(pageAdmins)
-    const existingAdmin = pageAdmins.find(adminId=> ObjectId(adminId).toString() ===  req.body.id)
-    console.log(existingAdmin);
-    if(existingAdmin || req.body.id == existingPage.master._id){
-      res.status(401).json({error:'Admin already existe'})
-      return
+    console.log(existingUser)
+    const user = {
+      firstName: existingUser.firstName,
+      lastName : existingUser.lastName,
+      _id : userId
     }
-    const page = await PageEntreprise.findOneAndUpdate (
-      { _id: req.params.id },
-      { $push: { admins: [existingAdmin] } },
+    const existingAdmin = await PageEntreprise.findOne({admins:{_id:userId}})
+    if(existingAdmin || existingAdmin === req.user.id){
+      res.status(401).json({message:'User is already admin'})
+      return;
+    }
+     const pageToUpdate = await PageEntreprise.findOneAndUpdate(
+      { master: req.user.id },
+      { $push: {
+         admins: [user]
+        } },
       { new: true }
-     
     );
-    res.status(201).json({ message: "New admin added successfully", page });
+    res.status(201).json({ message: "New admin added successfully", pageToUpdate});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const removeAdmin = async (req, res) => {
+  try {
+    const pageId = req.params.id;
+    const pageEntreprise = await PageEntreprise.findById(pageId);
+    if (!pageEntreprise) {
+      res.status(404).json({ error: "Page not founded" });
+      return;
+    }
+
+   const userId = mongoose.Types.ObjectId(req.body.id)
+    const existingUser = await User.findById(userId);
+    if (!existingUser ) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+    // console.log(existingUser)
+    const user = {
+      firstName: existingUser.firstName,
+      lastName : existingUser.lastName,
+      _id : userId
+    }
+    const existingAdmin = await PageEntreprise.findOne({admins:{_id:userId}})
+    if(!existingAdmin){
+      res.status(401).json({message:'User is not  admin'})
+      return;
+    }
+    // console.log(user._id)
+    const page = await PageEntreprise.findOneAndUpdate(
+      { master: req.user.id },
+      { $pull: {
+         admins: user._id
+        } },
+      { new: true }
+    );
+    res.status(201).json({ message: "Admin deleted successfully", page });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -79,33 +121,28 @@ const getPageEntreprise = async (req, res) => {
     }
     res.status(201).json({ page });
   } catch (error) {
-    res
+    res.status(500).json({ error: error.message });
   }
 };
-const removeAdmin = async (req, res)=>{
+
+
+const removePageEntreprise = async (req, res) => {
   try {
-    
-  } catch (error) {
-    
-  }
-}
-const removePageEntreprise = async(req,res)=>{
-  try {
-    const pageId = req.params.id
-    const pageEntreprise = await PageEntreprise.findByIdAndDelete(pageId)
-    if(!pageEntreprise){
-      res.status(404).json({error: 'Page not found'})
+    const pageId = req.params.id;
+    const deletePage = await PageEntreprise.findByIdAndDelete(pageId);
+    if (!deletePage) {
+      res.status(404).json({ error: "Page not found" });
       return;
     }
-    res.status(201).json({massage: 'Page is deleted successfully'})
+    res.status(201).json({ massage: "Page is deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 module.exports = {
   creatPageEntreprise,
   addNewAdmin,
   getPageEntreprise,
   removePageEntreprise,
-  removeAdmin
+  removeAdmin,
 };
