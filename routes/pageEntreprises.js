@@ -1,5 +1,5 @@
 const express = require('express')
-const { creatPageEntreprise, addNewAdmin, getPageEntreprise, removePageEntreprise, removeAdmin } = require('../controllers/pageEntreprise')
+const { creatPageEntreprise, addNewAdmin, getPageEntreprise, removePageEntreprise, removeAdmin } = require('../controllers/pageEntreprises')
 const checkAuth = require('../middlewares/check-auth')
 const router = express.Router()
 
