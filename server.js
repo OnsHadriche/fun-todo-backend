@@ -6,6 +6,8 @@ require('dotenv').config()
 const userRouter = require('./routes/users')
 const packageRouter = require('./routes/packages')
 const pageRouter = require('./routes/pageEntreprises')
+const hotelRouter = require('./routes/hotels')
+const eventRouter = require('./routes/events')
 
 
 const app = express()
@@ -16,6 +18,8 @@ app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 app.use('/auth', userRouter)
 app.use('/packs', packageRouter)
 app.use('/pageEntreprise', pageRouter )
+app.use('/hotels', hotelRouter)
+app.use('/events',eventRouter)
 
 const TRAVELPLAN =[
     {
