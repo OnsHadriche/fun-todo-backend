@@ -5,7 +5,7 @@ require('dotenv').config()
 
 const userRouter = require('./routes/users')
 const packageRouter = require('./routes/packages')
-const pageRouter = require('./routes/pageEntreprise')
+const pageRouter = require('./routes/pageEntreprises')
 
 
 const app = express()
