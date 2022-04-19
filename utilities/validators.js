@@ -36,6 +36,24 @@ const resetValidator =Joi.object({
     country: Joi.string().required()
 
 });
+//Hotel
+ const hotelValidator = Joi.object({
+    title: Joi.string().required().min(2).max(70),
+    details: Joi.string(),
+    photo: Joi.string(),
+    price: Joi.number().required(),
+    country: Joi.string().required()
+
+});
+//Event
+ const eventValidator = Joi.object({
+    title: Joi.string().required().min(2).max(70),
+    details: Joi.string(),
+    photo: Joi.string(),
+    price: Joi.number().required(),
+    country: Joi.string().required()
+
+});
 
 
 module.exports ={
@@ -44,5 +62,7 @@ module.exports ={
     resetValidator,
     forgetPasswordValidator,
     packageValidator,
-    pageValidator
+    pageValidator,
+    hotelValidator,
+    eventValidator
 }
