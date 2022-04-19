@@ -20,6 +20,10 @@ const packageSchema = mongoose.Schema({
     },
     details:{
         type:String
+    },
+    page :{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PageEntreprise"
     }
 })
 
