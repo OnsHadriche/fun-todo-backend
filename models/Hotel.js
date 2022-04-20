@@ -17,12 +17,35 @@ const hotelSchema = mongoose.Schema({
         type:String,
         required: true
     },
+    photos:[{
+        type: String,
+        default:' '
+    }],
     details:{
         type:String
     },
+    countChambre:{
+        type:Number,
+        required: true,
+        min:0,
+        max:500
+    },
+    rating:{
+        type: Number,
+        default:0
+    },
+    isFeatured:{
+        type:Boolean,
+        default:false
+    },
+   
     page :{
         type: mongoose.Schema.Types.ObjectId,
         ref: "PageEntreprise"
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now
     }
 });
 module.exports = mongoose.model("Hotel", hotelSchema);
