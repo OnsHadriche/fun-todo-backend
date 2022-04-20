@@ -3,21 +3,25 @@ const { eventValidator } = require("../utilities/validators");
 //get all Events
 const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find().populate({path: 'page', model: 'PageEntreprise', select:'title'});
+    const events = await Event.find().populate([
+      { path: "user", model: "User", select: "firstName lastName" },
+      { path: "page", model: "PageEntreprise", select: "title" },
+      { path: "category", model: "Category", select: "name" },
+    ]);
     res.status(201).json({ events });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 //find Events by country
-const getEvent = async (req, res) => {
-  try {
-    const event = await Event.findOne({ country: req.body.country });
-    res.status(201).json({ Event });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// const getEvent = async (req, res) => {
+//   try {
+//     const event = await Event.findOne({ country: req.body.country});
+//     res.status(201).json( event );
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 //find Events by price
 const getEventPrice = async (req, res) => {
   try {
@@ -25,21 +29,21 @@ const getEventPrice = async (req, res) => {
       {
         $bucket: {
           // Bucket by price
-          groupBy: '$price',
-          // With 4 price ranges: [0, 250), [250, 500), [500, 1000),[1000,2000), [2000,5000]
-          boundaries: [0, 250, 500, 1000,2000,50000],
-          default: 'Others',
-          output : {
-            "count": { $sum: 1 },
-            "titles": { $push: "$title" }
-          }
-        }
-      }
-    ])
-    const price = req.body.price
-    const titleOfEvent = eventByPrice.find(e => e._id === price)
-    
-    res.status(201).json({eventByPrice, titleOfEvent});
+          groupBy: "$price",
+          // With 4 price ranges: [0, 250), [250, 500)
+          boundaries: [0, 250, 500],
+          default: "Others",
+          output: {
+            count: { $sum: 1 },
+            titles: { $push: "$title" },
+          },
+        },
+      },
+    ]);
+    const price = req.body.price;
+    const titleOfEvent = eventByPrice.find((e) => e._id === price);
+
+    res.status(201).json({ eventByPrice, titleOfEvent });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -47,7 +51,11 @@ const getEventPrice = async (req, res) => {
 const getOneEvent = async (req, res) => {
   try {
     const { id } = req.params.id;
-    const event = await Event.findById(id).populate({path: 'page', model: 'PageEntreprise', select:'title'});
+    const event = await Event.findById(id).populate({
+      path: "page ",
+      model: "PageEntreprise ",
+      select: "title",
+    });
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     }
@@ -65,20 +73,26 @@ const createEvent = async (req, res) => {
       res.status(400).json(validationResult);
     } else {
       const { photo, title, price, country, details } = req.body;
-      const event= new Event({
+
+      const event = new Event({
         photo: photo,
         title: title,
         price: price,
         country: country,
         details: details,
-        page : req.params.pageId 
+        page: req.params.pageId,
+        user: req.user.id,
+        category: req.params.categoryId,
       });
-      savedEvent.page = page
-      let savedevent = await event.save();
-      console.log(savedPack);
+
+      let savedEvent = await event.save();
+      req.user.password = undefined;
+      req.user.__v = undefined;
+      savedEvent.user = req.user;
+      console.log(savedEvent);
       res.status(201).json({
         message: "Event created successfully",
-        pack: savedPack,
+        event: savedEvent,
       });
     }
   } catch (error) {
@@ -102,9 +116,7 @@ const updateEvent = async (req, res) => {
     if (!event) {
       return res.status(404).json({ error: "Event not found" });
     } else {
-      res
-        .status(201)
-        .json({ message: "Event uptdated successfully", event });
+      res.status(201).json({ message: "Event uptdated successfully", event });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -125,7 +137,7 @@ const deleteEvent = async (req, res) => {
 
 module.exports = {
   getAllEvents,
-  getEvent,
+  // getEvent,
   getOneEvent,
   createEvent,
   updateEvent,

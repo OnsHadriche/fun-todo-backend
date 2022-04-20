@@ -10,14 +10,14 @@ const getAllHotels = async (req, res) => {
   }
 };
 //find Hotels by country
-const getHotel = async (req, res) => {
-  try {
-    const hotel = await Hotel.findOne({ country: req.body.country });
-    res.status(201).json({ hotel });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+// const getHotel = async (req, res) => {
+//   try {
+//     const hotel = await Hotel.findOne({ country: req.body.country });
+//     res.status(201).json({ hotel });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 //find Hotels by price
 const getHotelPrice = async (req, res) => {
   try {
@@ -64,21 +64,21 @@ const createHotel = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { photo, title, price, country, details } = req.body;
+      const { photo, title, price, country, details,chambre } = req.body;
       const hotel= new Hotel({
         photo: photo,
         title: title,
         price: price,
         country: country,
         details: details,
+        chambre: chambre,
         page : req.params.pageId 
       });
-      savedHotel.page = page
       let savedHotel = await hotel.save();
-      console.log(savedPack);
+      console.log(savedHotel);
       res.status(201).json({
         message: "Hotel created successfully",
-        pack: savedPack,
+        pack: savedHotel,
       });
     }
   } catch (error) {
@@ -125,7 +125,7 @@ const deleteHotel = async (req, res) => {
 
 module.exports = {
   getAllHotels,
-  getHotel,
+  // getHotel,
   getOneHotel,
   createHotel,
   updateHotel,
