@@ -8,6 +8,7 @@ const packageRouter = require('./routes/packages')
 const pageRouter = require('./routes/pageEntreprises')
 const hotelRouter = require('./routes/hotels')
 const eventRouter = require('./routes/events')
+const categoryRouter = require('./routes/categories')
 
 
 const app = express()
@@ -20,6 +21,7 @@ app.use('/packs', packageRouter)
 app.use('/pageEntreprise', pageRouter )
 app.use('/hotels', hotelRouter)
 app.use('/events',eventRouter)
+app.use('/category', categoryRouter)
 
 const TRAVELPLAN =[
     {
