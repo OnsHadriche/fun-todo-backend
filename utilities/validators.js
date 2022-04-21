@@ -33,7 +33,8 @@ const resetValidator =Joi.object({
     details: Joi.string(),
     photo: Joi.string(),
     price: Joi.number().required(),
-    country: Joi.string().required()
+    country: Joi.string().required(),
+    expiredAt: Joi.date().iso().required()
 
 });
 //Hotel

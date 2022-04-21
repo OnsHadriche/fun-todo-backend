@@ -1,3 +1,4 @@
+
 const Package = require("../models/Package");
 const { packageValidator } = require("../utilities/validators");
 //get all packages
@@ -64,16 +65,19 @@ const createPackage = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { photo, title, price, country, details } = req.body;
+      const { photo, title, price, country, details,expiredAt} = req.body;
+      let time = new Date(expiredAt)
+  
       const pack = new Package({
         photo: photo,
         title: title,
         price: price,
         country: country,
         details: details,
+        createAt: req.params.createAt,
+        expiredAt: time,
         page : req.params.pageId 
       });
-      savedPack.page = page
       let savedPack = await pack.save();
       console.log(savedPack);
       res.status(201).json({
