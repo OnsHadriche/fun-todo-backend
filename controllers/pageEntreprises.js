@@ -17,7 +17,7 @@ const creatPageEntreprise = async (req, res) => {
     if (pageEntrepriseTitle) {
       return res
         .status(401)
-        .json({ error: "Please enter a valid company title" });
+        .json({ error: "Company name already exist" });
     }
     const { title, description, photo, contact } = req.body;
 
@@ -54,8 +54,8 @@ const addNewAdmin = async (req, res) => {
       lastName : existingUser.lastName,
       _id : userId
     }
-    const existingAdmin = await PageEntreprise.findOne({admins:{_id:userId}})
-    if(existingAdmin || existingAdmin === req.user.id){
+    const existingAdmin = await PageEntreprise.findOne({admins:[{_id:userId}]})
+    if(existingAdmin  || userId == req.user.id){
       res.status(401).json({message:'User is already admin'})
       return;
     }
