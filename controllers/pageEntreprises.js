@@ -26,7 +26,7 @@ const creatPageEntreprise = async (req, res) => {
       description: description,
       photo: photo,
       contact: contact,
-      master: req.user.id,
+      master: req.user._id,
     });
     const savedPage = await pageEntreprise.save();
     req.user.password = undefined;
@@ -99,7 +99,7 @@ const removeAdmin = async (req, res) => {
     }
     // console.log(user._id)
     const page = await PageEntreprise.findOneAndUpdate(
-      { master: req.user.id },
+      { master: req.user._id },
       { $pull: {
          admins: user._id
         } },

@@ -9,6 +9,12 @@ const registerValidator = Joi.object({
     password: Joi.string().required().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$@<>!%&*?])[A-Za-z\d#$@<>!%&*?]{4,30}$/),
     repeatPassword : Joi.ref('password')
 })
+const updateValidator = Joi.object({
+    firstName : Joi.string().alphanum(),
+    lastName : Joi.string(),
+    phoneNumber: checkNumber.string().phoneNumber({defaultCountry:'TN', format: 'rfc3966'}),
+    email: Joi.string().email(),
+})
 const loginValidator = Joi.object({
     email: Joi.string().email({ tlds: { allow: false } }).required(),
     password: Joi.string().required()
@@ -67,5 +73,6 @@ module.exports ={
     packageValidator,
     pageValidator,
     hotelValidator,
-    eventValidator
+    eventValidator, 
+    updateValidator
 }

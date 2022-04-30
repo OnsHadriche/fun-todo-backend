@@ -12,6 +12,8 @@ const {
   loginValidator,
   resetValidator,
   forgetPasswordValidator,
+  updateValidato,
+  updateValidator,
 } = require("../utilities/validators");
 
 //Get all users
@@ -23,6 +25,24 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+//Myprofile
+const getUserInfo = async (req, res) =>{
+  try {
+    const user = await User.findById(req.user._id)
+    if(!user){
+      res.status(404).json({error:'Something went wrong'})
+    return
+    }
+    res.status(201).json({
+      message: `Welcome again ${user.firstName}`,
+      user 
+    })
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    
+  }
+}
 //Register User
 const register = async (req, res) => {
   try {
@@ -93,6 +113,31 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const updateUserInfo = async(req,res)=>{
+  try {
+    const validationResult = updateValidator.validate(req.body, {
+      abortEarly: false,
+    });
+    if (validationResult.error) {
+      return res.status(400).json(validationResult);
+    }
+    const user = await User.findByIdAndUpdate(
+      { _id: req.user._id},
+      { $set: req.body },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    } else {
+      res
+        .status(201)
+        .json({ message: "user uptdated successfully", user });
+    }
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 const forgetPassword = async (req, res) => {
   try {
     const validatorResult = forgetPasswordValidator.validate(req.body, {
@@ -176,4 +221,6 @@ module.exports = {
   resetPassword,
   forgetPassword,
   getAllUsers,
+  updateUserInfo,
+  getUserInfo,
 };
