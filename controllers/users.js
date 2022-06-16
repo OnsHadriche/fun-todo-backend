@@ -12,9 +12,9 @@ const {
   loginValidator,
   resetValidator,
   forgetPasswordValidator,
-  updateValidato,
   updateValidator,
 } = require("../utilities/validators");
+const Token = require("../models/verificationToken");
 
 //Get all users
 const getAllUsers = async (req, res) => {
@@ -214,6 +214,8 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+//add favoriteList
+
 
 module.exports = {
   register,

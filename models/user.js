@@ -25,6 +25,21 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  listFavoriteHotel :[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Hotel'
+
+  }],
+  listFavoritePack :[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Package'
+
+  }],
+  listFavoriteEvent:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event'
+
+  }]
  
 });
 
