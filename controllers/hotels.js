@@ -1,10 +1,12 @@
+
 const Hotel = require("../models/Hotel");
+const PageEntreprise = require("../models/PageEntreprise");
 const { hotelValidator } = require("../utilities/validators");
 //get all Hotels
 const getAllHotels = async (req, res) => {
   try {
     const hotels = await Hotel.find().populate({path: 'page', model: 'PageEntreprise', select:'title'});
-    res.status(201).json({ hotels });
+    res.status(201).json(hotels );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -46,8 +48,8 @@ const getHotelPrice = async (req, res) => {
 };
 const getOneHotel = async (req, res) => {
   try {
-    const { id } = req.params.id;
-    const hotel = await Hotel.findById(id).populate({path: 'page', model: 'PageEntreprise', select:'title'});
+    const { id } = req.params;
+    const hotel = await Hotel.findById(id);
     if (!hotel) {
       return res.status(404).json({ error: "Hotel not found" });
     }
@@ -64,27 +66,27 @@ const createHotel = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { photo, title, price, country, details,chambre } = req.body;
+      const { photo, title, price, country, details,rooms} = req.body;
       const hotel= new Hotel({
         photo: photo,
         title: title,
         price: price,
         country: country,
         details: details,
-        chambre: chambre,
-        page : req.params.pageId 
+        rooms: rooms,
+        page : req.params.pageId
       });
       let savedHotel = await hotel.save();
-      console.log(savedHotel);
       res.status(201).json({
         message: "Hotel created successfully",
-        pack: savedHotel,
+        hotel: savedHotel,
       });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 const updateHotel = async (req, res) => {
   try {
     const hotelToUpdateId = req.params.id;
@@ -122,6 +124,15 @@ const deleteHotel = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getHotelByAgency = async (req, res) => {
+  try {
+    const pageId = req.params.id
+    const hotels = await Hotel.find( {page: pageId})
+    res.status(201).json(hotels);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 module.exports = {
   getAllHotels,
@@ -131,4 +142,6 @@ module.exports = {
   updateHotel,
   deleteHotel,
   getHotelPrice,
+  getHotelByAgency,
+
 };

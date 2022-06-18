@@ -24,11 +24,11 @@ const hotelSchema = mongoose.Schema({
     details:{
         type:String
     },
-    countChambre:{
+    rooms:{
         type:Number,
         required: true,
         min:0,
-        max:500
+        max:1000
     },
     rating:{
         type: Number,
