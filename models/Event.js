@@ -23,7 +23,7 @@ const eventSchema = mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
-    required:true
+    required:false
   },
   page: {
     type: mongoose.Schema.Types.ObjectId,

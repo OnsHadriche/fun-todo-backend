@@ -39,6 +39,11 @@ const userSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event'
 
+  }],
+  listFavoriteAgence:[{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'PageEntreprise'
+
   }]
  
 });
