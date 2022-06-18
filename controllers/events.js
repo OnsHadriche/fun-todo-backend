@@ -8,7 +8,9 @@ const getAllEvents = async (req, res) => {
       { path: "page", model: "PageEntreprise", select: "title" },
       { path: "category", model: "Category", select: "name" },
     ]);
-    res.status(201).json({ events });
+  
+
+    res.status(201).json( events );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -50,16 +52,13 @@ const getEventPrice = async (req, res) => {
 };
 const getOneEvent = async (req, res) => {
   try {
-    const { id } = req.params.id;
-    const event = await Event.findById(id).populate({
-      path: "page ",
-      model: "PageEntreprise ",
-      select: "title",
-    });
+    const  EventId  = req.params.id;
+    const event = await Event.findById(EventId).populate("page", "title");
     if (!event) {
-      return res.status(404).json({ error: "Event not found" });
+      res.status(404).json({ error: "Event not found" });
+      return;
     }
-    res.status(200).json(event);
+    res.status(201).json(event);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -82,7 +81,7 @@ const createEvent = async (req, res) => {
         details: details,
         page: req.params.pageId,
         user: req.user.id,
-        category: req.params.categoryId,
+        // category: req.params.categoryId,
       });
 
       let savedEvent = await event.save();
@@ -108,8 +107,8 @@ const updateEvent = async (req, res) => {
     if (validationResult.error) {
       return res.status(400).json(validationResult);
     }
-    const event = await Event.findByIdAndUpdate(
-      { _id: eventToUpdateId },
+    const event = await Event.findOneAndUpdate(
+      { _id: eventToUpdateId, user: req.user._id },
       { $set: req.body },
       { new: true }
     );
@@ -125,11 +124,14 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
-    const deletePack = await Event.findByIdAndRemove(eventId);
-    if (!deletePack) {
-      return res.status(404).json({ error: "Event not founded" });
+    const result = await Event.deleteOne({_id: eventId, user: req.user._id});
+    if (result.deletedCount === 1) {
+      res.status(201).json({ message: "Event deleted succssfully " });
+      
+    }else{
+
+      res.status(404).json({ error: "Event not founded" });
     }
-    res.status(201).json({ message: "the event is deleted succssfully " });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

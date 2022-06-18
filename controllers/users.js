@@ -2,11 +2,14 @@
 const bcrypt = require("bcryptjs");
 const JWT = require("jsonwebtoken");
 const transporter = require("../utilities/sendEmail");
-
-
+const Token = require("../models/verificationToken");
 // mongoose user model
-const User = require("../models/User");
 
+const PageEntreprise = require("../models/PageEntreprise");
+const User = require("../models/User");
+const Hotel = require("../models/Hotel");
+const Event = require("../models/Event")
+const Package = require("../models/Package");
 const {
   registerValidator,
   loginValidator,
@@ -14,7 +17,8 @@ const {
   forgetPasswordValidator,
   updateValidator,
 } = require("../utilities/validators");
-const Token = require("../models/verificationToken");
+
+
 
 //Get all users
 const getAllUsers = async (req, res) => {
@@ -26,23 +30,21 @@ const getAllUsers = async (req, res) => {
   }
 };
 //Myprofile
-const getUserInfo = async (req, res) =>{
+const getUserInfo = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-    if(!user){
-      res.status(404).json({error:'Something went wrong'})
-    return
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      res.status(404).json({ error: "Something went wrong" });
+      return;
     }
     res.status(201).json({
       message: `Welcome again ${user.firstName}`,
-      user 
-    })
-
+      user,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
-    
   }
-}
+};
 //Register User
 const register = async (req, res) => {
   try {
@@ -113,7 +115,7 @@ const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const updateUserInfo = async(req,res)=>{
+const updateUserInfo = async (req, res) => {
   try {
     const validationResult = updateValidator.validate(req.body, {
       abortEarly: false,
@@ -122,22 +124,19 @@ const updateUserInfo = async(req,res)=>{
       return res.status(400).json(validationResult);
     }
     const user = await User.findByIdAndUpdate(
-      { _id: req.user._id},
+      { _id: req.user._id },
       { $set: req.body },
       { new: true }
     );
     if (!user) {
       return res.status(404).json({ error: "user not found" });
     } else {
-      res
-        .status(201)
-        .json({ message: "user uptdated successfully", user });
+      res.status(201).json({ message: "user uptdated successfully", user });
     }
-    
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 const forgetPassword = async (req, res) => {
   try {
     const validatorResult = forgetPasswordValidator.validate(req.body, {
@@ -190,7 +189,7 @@ const forgetPassword = async (req, res) => {
 // Reset_password
 const resetPassword = async (req, res) => {
   try {
-    const password = req.body.password
+    const password = req.body.password;
     const userToupadateId = req.params.id;
     const validatorResult = resetValidator.validate(req.body, {
       abortEarly: false,
@@ -214,7 +213,201 @@ const resetPassword = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-//add favoriteList
+//add and remove favoriteList
+//hotel
+const createFavHotel = async (req, res) => {
+  try {
+    const hotelId = req.body.id;
+
+    const addHotel = await Hotel.findById(hotelId);
+    
+    if (!addHotel) {
+      res.status(404).json({ error: "Hotel not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: req.user._id,
+      },
+      {
+        $addToSet: { listFavoriteHotel: [addHotel] },
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "add succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const removeFromListFavoHotel = async(req,res)=>{
+  try {
+    const hotelId = req.body.id;
+
+    const removeHotel = await Hotel.findById(hotelId);
+    
+    if (!removeHotel) {
+      res.status(404).json({ error: "Hotel not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: req.user._id
+      },
+      {
+        $pull: { listFavoriteHotel: hotelId }
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "remove succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+//pack
+const createFavPack = async (req, res) => {
+  try {
+    const packId = req.body.id;
+    const addPack = await Package.findById(packId);
+    if (!addPack) {
+      res.status(404).json({ error: "pack not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        id: req.user._id,
+      },
+      {
+        $addToSet: { listFavoritePack: [addPack] },
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "add succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const removeFromListFavoPack = async(req,res)=>{
+  try {
+    const packId = req.body.id;
+
+    const removePack = await Package.findById(packId);
+    
+    if (!removePack) {
+      res.status(404).json({ error: "pack not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: req.user._id
+      },
+      {
+        $pull: { listFavoritePack: [packId] }
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "remove succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+//event
+const createFavEvent = async (req, res) => {
+  try {
+    const eventId = req.body.id;
+    const addEvent = await Event.findById(eventId);
+    if (!addEvent) {
+      res.status(404).json({ error: "event not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        id: req.user._id,
+      },
+      {
+        $addToSet: { listFavoriteEvent: [addEvent] },
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "add succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const removeFromListFavoriteEvent = async(req,res)=>{
+  try {
+    const eventId = req.body.id;
+
+    const removeEvent = await Event.findById(eventId);
+    
+    if (!removeHotel) {
+      res.status(404).json({ error: "event not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: req.user._id
+      },
+      {
+        $pull: { listFavoriteEvent: eventId }
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "remove succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+//agence
+const createFavAgency = async (req, res) => {
+  try {
+    const agencyId = req.body.id;
+    const addAgency = await PageEntreprise.findById(agencyId);
+    if (!addAgency) {
+      res.status(404).json({ error: "Page not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        id: req.params._id,
+      },
+      {
+        $addToSet: { listFavoriteAgence: [addAgency] },
+      }
+    );
+    res.status(201).json({ message: "add succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+const removeFromListFavoritePage = async(req,res)=>{
+  try {
+    const agencyId = req.body.id;
+
+    const removeAgency = await PageEntreprise.findById(agencyId);
+    
+    if (!removeAgency) {
+      res.status(404).json({ error: "Page not found" });
+      return;
+    }
+    const userToUpdate = await User.findOneAndUpdate(
+      {
+        _id: req.user._id
+      },
+      {
+        $pull: { listFavoriteAgence: agencyId }
+      },
+      {new:true}
+    );
+    res.status(201).json({ message: "remove succesufully", userToUpdate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+
+
 
 
 module.exports = {
@@ -225,4 +418,12 @@ module.exports = {
   getAllUsers,
   updateUserInfo,
   getUserInfo,
+  createFavHotel,
+  createFavPack,
+  createFavEvent,
+  createFavAgency,
+  removeFromListFavoHotel,
+  removeFromListFavoPack,
+  removeFromListFavoriteEvent,
+  removeFromListFavoritePage
 };
