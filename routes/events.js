@@ -10,6 +10,7 @@ router.get('/price', getEventPrice)
 router.get('/:id', checkAuth, getOneEvent)
 router.post('/create-event/:pageId/:categoryId',checkAuth, createEvent)
 router.post('/create-event-master/:categoryId',checkAuth, createEvent)
+router.post('/create-event-master',checkAuth, createEvent)
 router.put('/:id',checkAuth, updateEvent)
 router.delete('/:id',checkAuth, deleteEvent)
 

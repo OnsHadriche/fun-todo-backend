@@ -18,7 +18,7 @@ app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
 app.use('/auth', userRouter)
 app.use('/packs', packageRouter)
-app.use('/pageEntreprise', pageRouter )
+app.use('/pages', pageRouter )
 app.use('/hotels', hotelRouter)
 app.use('/events',eventRouter)
 app.use('/category', categoryRouter)
