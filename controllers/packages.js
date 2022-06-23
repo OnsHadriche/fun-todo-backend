@@ -64,6 +64,17 @@ const getOnePackage = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getPackageByPage = async(req, res)=>{
+  try {
+    const pageId = req.params.id
+    const packByAgency = await Package.find({page: pageId})
+    res.status(200).json(packByAgency)
+    console.log("=====================================");
+    console.log(packByAgency);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 const createPackage = async (req, res) => {
   try {
     const validationResult = packageValidator.validate(req.body, {
@@ -142,4 +153,5 @@ module.exports = {
   updatePackage,
   deletePackage,
   getPackagePrice,
+  getPackageByPage
 };

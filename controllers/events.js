@@ -1,4 +1,6 @@
 const Event = require("../models/Event");
+const PageEntreprise = require("../models/PageEntreprise");
+const User = require("../models/User");
 const { eventValidator } = require("../utilities/validators");
 //get all Events
 const getAllEvents = async (req, res) => {
@@ -63,6 +65,28 @@ const getOneEvent = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getEventByPage = async(req, res) => {
+  try {
+    const id = req.params.id
+
+    const pageToFind = await PageEntreprise.findById(id)
+    if (pageToFind){
+      const eventByPage = await Event.find({page: id})
+      res.status(201).json(eventByPage)
+      return
+    }
+      
+    const eventByPage = await Event.find({user: id})
+    res.status(201).json(eventByPage)
+    
+ 
+
+ 
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 const createEvent = async (req, res) => {
   try {
     const validationResult = eventValidator.validate(req.body, {
@@ -145,4 +169,5 @@ module.exports = {
   updateEvent,
   deleteEvent,
   getEventPrice,
+  getEventByPage
 };

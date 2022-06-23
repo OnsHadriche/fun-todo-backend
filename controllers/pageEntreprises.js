@@ -21,7 +21,7 @@ const getOnePage = async (req, res) => {
     if (!page) {
       return res.status(404).json({ error: "Page not founded" });
     }
-    res.status(201).json({ page });
+    res.status(201).json(page);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
