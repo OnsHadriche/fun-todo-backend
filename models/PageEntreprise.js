@@ -10,8 +10,10 @@ const pageSchema = mongoose.Schema({
   },
   photo: {
     type: String,
-    default: "",
   },
+  photos: [{
+    type:String
+  }],
   contact: {
     type: Number,
     required: true,

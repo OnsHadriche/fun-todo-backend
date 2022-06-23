@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const packageSchema = mongoose.Schema({
   photo: {
     type: String,
-    default: " ",
   },
+  photos: [{
+    type:String
+  }],
   title: {
     type: String,
     required: true,
@@ -17,7 +19,9 @@ const packageSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  details: String,
+  details: {
+    type: String
+  },
   createdAt: {
     type: Date,
     default: Date.now,

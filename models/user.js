@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const userSchema = mongoose.Schema({
   photo: {
     type: String,
-    default:''
   },
   firstName: {
     type: String,
@@ -44,6 +43,9 @@ const userSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'PageEntreprise'
 
+  }],
+  photos:[{
+    type:String
   }]
  
 });

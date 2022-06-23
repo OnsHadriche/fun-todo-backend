@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const hotelSchema = mongoose.Schema({
     photo: {
-        type: String,
-        default:' '
+        type: String
+  
     },
     title:{
         type:String,
@@ -19,7 +19,6 @@ const hotelSchema = mongoose.Schema({
     },
     photos:[{
         type: String,
-        default:' '
     }],
     details:{
         type:String

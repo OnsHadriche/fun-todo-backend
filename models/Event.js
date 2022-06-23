@@ -3,8 +3,12 @@ const mongoose = require("mongoose");
 const eventSchema = mongoose.Schema({
   photo: {
     type: String,
-    default: " ",
   },
+  photos: [
+    {
+      type: String,
+    }
+  ],
   title: {
     type: String,
     required: true,
@@ -23,7 +27,7 @@ const eventSchema = mongoose.Schema({
   category: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
-    required:false
+    required: false,
   },
   page: {
     type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +36,13 @@ const eventSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  expiredAt: {
+    type: Date,
   },
 });
 module.exports = mongoose.model("Event", eventSchema);
