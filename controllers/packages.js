@@ -1,6 +1,6 @@
 const Package = require("../models/Package");
 const { packageValidator } = require("../utilities/validators");
-
+const cloudinary = require("../utilities/cloudinary");
 
 //get all packages
 const getAllPackages = async (req, res) => {
@@ -10,7 +10,7 @@ const getAllPackages = async (req, res) => {
       model: "PageEntreprise",
       select: "title",
     });
-    res.status(201).json( package );
+    res.status(201).json(package);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -66,17 +66,17 @@ const getOnePackage = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const getPackageByPage = async(req, res)=>{
+const getPackageByPage = async (req, res) => {
   try {
-    const pageId = req.params.id
-    const packByAgency = await Package.find({page: pageId})
-    res.status(200).json(packByAgency)
+    const pageId = req.params.id;
+    const packByAgency = await Package.find({ page: pageId });
+    res.status(200).json(packByAgency);
     console.log("=====================================");
     console.log(packByAgency);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 const createPackage = async (req, res) => {
   try {
     const validationResult = packageValidator.validate(req.body, {
@@ -85,11 +85,13 @@ const createPackage = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { photo, title, price, country, details, expiredAt } = req.body;
+      const { title, price, country, details, expiredAt } = req.body;
+      const result = await cloudinary.uploader.upload(req.file.path);
+
       let time = new Date(expiredAt);
 
       const pack = new Package({
-        photo: photo,
+        image: result.secure_url,
         title: title,
         price: price,
         country: country,
@@ -97,6 +99,7 @@ const createPackage = async (req, res) => {
         createAt: req.params.createAt,
         expiredAt: time,
         page: req.params.pageId,
+        cloudinary_id: result.public_id,
       });
       let savedPack = await pack.save();
       console.log(savedPack);
@@ -118,9 +121,29 @@ const updatePackage = async (req, res) => {
     if (validationResult.error) {
       return res.status(400).json(validationResult);
     }
+    const packToUpdate = await Package.findById(packageToUpdateId);
+    let packImage = packToUpdate.image;
+    let packImageCloudId = packToUpdate.cloudinary_id;
+    if (req.file) {
+      await cloudinary.uploader.destroy(packToUpdate.cloudinary_id);
+      result = await cloudinary.uploader.upload(req.file.path);
+      packImage = result.secure_url;
+      packImageCloudId = result.public_id;
+    }
+
+    const { title, price, country, details, expiredAt } = req.body;
+    const data = {
+      title,
+      price,
+      country,
+      details,
+      expiredAt,
+      image: packImage,
+      cloudinary_id: packImageCloudId
+    };
     const package = await Package.findByIdAndUpdate(
       { _id: packageToUpdateId },
-      { $set: req.body },
+      data,
       { new: true }
     );
     if (!package) {
@@ -155,5 +178,5 @@ module.exports = {
   updatePackage,
   deletePackage,
   getPackagePrice,
-  getPackageByPage
+  getPackageByPage,
 };

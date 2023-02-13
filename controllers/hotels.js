@@ -2,6 +2,8 @@ const Hotel = require("../models/Hotel");
 const PageEntreprise = require("../models/PageEntreprise");
 const Review = require("../models/Review");
 const { hotelValidator } = require("../utilities/validators");
+const cloudinary = require("../utilities/cloudinary");
+
 //get all Hotels
 
 const getAllHotels = async (req, res) => {
@@ -79,15 +81,19 @@ const createHotel = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { photo, title, price, country, details, rooms } = req.body;
+      const { title, price, country, details, rooms } = req.body;
+      const result = await cloudinary.uploader.upload(req.file.path);
+      
       const hotel = new Hotel({
-        photo: photo,
+        image: result.secure_url,
         title: title,
         price: price,
         country: country,
         details: details,
         rooms: rooms,
         page: req.params.pageId,
+        cloudinary_id: result.public_id,
+
       });
       let savedHotel = await hotel.save();
       res.status(201).json({
@@ -109,9 +115,28 @@ const updateHotel = async (req, res) => {
     // if (validationResult.error) {
     //   return res.status(400).json(validationResult);
     // }
+    let hotelToUpadate = await Hotel.findById(hotelToUpdateId)
+    let hotelImage = hotelToUpadate.image
+    let hotelImageCloudId = hotelToUpadate.cloudinary_id
+    if (req.file) {
+      await cloudinary.uploader.destroy(hotelToUpadate.cloudinary_id);
+      result = await cloudinary.uploader.upload(req.file.path);
+      hotelImage = result.secure_url;
+      hotelImageCloudId = result.public_id;
+    }
+    const { title, price, country, details, rooms } = req.body;
+    const data = {
+      image: hotelImage,
+      title,
+      price,
+      country,
+      details,
+      rooms,
+      cloudinary_id: hotelImageCloudId
+    }
     const hotel = await Hotel.findByIdAndUpdate(
       { _id: hotelToUpdateId },
-      { $set: req.body },
+      data ,
       { new: true }
     );
     if (!hotel) {
