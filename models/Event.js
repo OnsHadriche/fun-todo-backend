@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const eventSchema = mongoose.Schema({
-  photo: {
+  image: {
     type: String,
   },
   photos: [
@@ -25,9 +25,8 @@ const eventSchema = mongoose.Schema({
     type: String,
   },
   category: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Categories",
-    required: false,
+    type : String,
+    required: true,
   },
   page: {
     type: mongoose.Schema.Types.ObjectId,
@@ -44,5 +43,8 @@ const eventSchema = mongoose.Schema({
   expiredAt: {
     type: Date,
   },
+  cloudinary_id: {
+    type: String
+  }
 });
 module.exports = mongoose.model("Event", eventSchema);
