@@ -10,6 +10,7 @@ const fileFilter = (req, file, cb) => {
     // To reject this file pass `false`
     // To accept the file pass `true`
     const isValid = !!MIME_TYPE_MAP[file.mimetype];
+    console.log(isValid)
     // You can always pass an error as a first parameter to `cb` if something goes wrong
     // Otherwise, pass `null`
     const error = isValid ? null : new Error('Invalid file type!');

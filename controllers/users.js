@@ -4,12 +4,13 @@ const JWT = require("jsonwebtoken");
 const transporter = require("../utilities/sendEmail");
 const Token = require("../models/verificationToken");
 // mongoose user model
-
+const path = require("path");
 const PageEntreprise = require("../models/PageEntreprise");
 const User = require("../models/User");
 const Hotel = require("../models/Hotel");
-const Event = require("../models/Event")
+const Event = require("../models/Event");
 const Package = require("../models/Package");
+const cloudinary = require("../utilities/cloudinary");
 const {
   registerValidator,
   loginValidator,
@@ -17,8 +18,6 @@ const {
   forgetPasswordValidator,
   updateValidator,
 } = require("../utilities/validators");
-
-
 
 //Get all users
 const getAllUsers = async (req, res) => {
@@ -45,8 +44,13 @@ const getUserInfo = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-//Register User
+//Register User and upload file via cloudinary
 const register = async (req, res) => {
+  // console.log(req.file);
+  const timestamp = Math.round(new Date() / 1000);
+  const params = {
+    timestamp: timestamp,
+  };
   try {
     const validatorResult = registerValidator.validate(req.body, {
       abortEarly: false,
@@ -62,6 +66,16 @@ const register = async (req, res) => {
           .json({ error: "An account with this email exists already" });
         return;
       }
+      if (!req.file) {
+        return res.status(400).json({
+          type: "error",
+          message: "A file must be provided!",
+        });
+      }
+      //Upload image to cloudinary
+      console.log(req.file)
+      const result = await cloudinary.uploader.upload(req.file.path);
+      console.log(result);
       const salt = await bcrypt.genSalt(10);
       const pwdHash = await bcrypt.hash(password, salt);
       await new User({
@@ -70,11 +84,14 @@ const register = async (req, res) => {
         phoneNumber,
         email,
         password: pwdHash,
+        image: result.secure_url,
+        cloudinary_id: result.public_id
       }).save();
       res.status(201).json({ message: "Account created successfully" });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.log(error);
+    res.status(500).json({ error: error });
   }
 };
 
@@ -116,16 +133,43 @@ const login = async (req, res) => {
   }
 };
 const updateUserInfo = async (req, res) => {
+  let result;
+  console.log(req.file)
   try {
     const validationResult = updateValidator.validate(req.body, {
       abortEarly: false,
     });
     if (validationResult.error) {
+      console.log(req.file)
       return res.status(400).json(validationResult);
+    }
+    let userToUapdate = await User.findById(req.user._id);
+    let userImage = userToUapdate.image;
+    let userImageCloudId = userToUapdate.cloudinary_id;
+    // Delete image from cloudinary
+    
+    if(req.file)
+    {
+      await cloudinary.uploader.destroy(userToUapdate.cloudinary_id)
+      result = await cloudinary.uploader.upload(req.file.path)
+      userImage = result.secure_url
+      userImageCloudId = result.public_id
+    }
+    //update and upload new image 
+   
+    const { firstName, lastName, phoneNumber, email} = req.body
+
+    const data = {
+      firstName : firstName,
+      lastName : lastName,
+      phoneNumber : phoneNumber,
+      email : email,
+      image:  userImage ,
+      cloudinary_id: userImageCloudId
     }
     const user = await User.findByIdAndUpdate(
       { _id: req.user._id },
-      { $set: req.body },
+      data,
       { new: true }
     );
     if (!user) {
@@ -215,13 +259,44 @@ const resetPassword = async (req, res) => {
 };
 //add and remove favoriteList
 //hotel
-const createFavHotel = async (req, res) => {
+// const createVisitedHotel = async (req, res) => {
+//   try {
+//     const hotelId = req.params.id;
+
+//     const addHotel = await Hotel.findById(hotelId);
+
+//     if (!addHotel) {
+//       res.status(404).json({ error: "Hotel not found" });
+//       return;
+//     }
+//     const {favorite,note}= req.body
+//     console.log(note)
+//     if(favorite || note !== 0){
+//       const userToUpdate = await User.findOneAndUpdate(
+//         {
+//           _id: req.user._id,
+
+//         },
+//         {
+//           $addToSet: {vistedHotel:[{id: hotelId, note: note, favorite: favorite}]},
+//         },
+//         {new:true}
+
+//       );
+//       return res.status(201).json({ message: "add succesufully", userToUpdate });
+//     }
+
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+const removeFromListFavoHotel = async (req, res) => {
   try {
     const hotelId = req.body.id;
 
-    const addHotel = await Hotel.findById(hotelId);
-    
-    if (!addHotel) {
+    const removeHotel = await Hotel.findById(hotelId);
+
+    if (!removeHotel) {
       res.status(404).json({ error: "Hotel not found" });
       return;
     }
@@ -230,33 +305,9 @@ const createFavHotel = async (req, res) => {
         _id: req.user._id,
       },
       {
-        $addToSet: { listFavoriteHotel: [addHotel] },
+        $pull: { listFavoriteHotel: hotelId },
       },
-      {new:true}
-    );
-    res.status(201).json({ message: "add succesufully", userToUpdate });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-const removeFromListFavoHotel = async(req,res)=>{
-  try {
-    const hotelId = req.body.id;
-
-    const removeHotel = await Hotel.findById(hotelId);
-    
-    if (!removeHotel) {
-      res.status(404).json({ error: "Hotel not found" });
-      return;
-    }
-    const userToUpdate = await User.findOneAndUpdate(
-      {
-        _id: req.user._id
-      },
-      {
-        $pull: { listFavoriteHotel: hotelId }
-      },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "remove succesufully", userToUpdate });
   } catch (error) {
@@ -279,31 +330,31 @@ const createFavPack = async (req, res) => {
       {
         $addToSet: { listFavoritePack: [addPack] },
       },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "add succesufully", userToUpdate });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-const removeFromListFavoPack = async(req,res)=>{
+const removeFromListFavoPack = async (req, res) => {
   try {
     const packId = req.body.id;
 
     const removePack = await Package.findById(packId);
-    
+
     if (!removePack) {
       res.status(404).json({ error: "pack not found" });
       return;
     }
     const userToUpdate = await User.findOneAndUpdate(
       {
-        _id: req.user._id
+        _id: req.user._id,
       },
       {
-        $pull: { listFavoritePack: [packId] }
+        $pull: { listFavoritePack: [packId] },
       },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "remove succesufully", userToUpdate });
   } catch (error) {
@@ -326,31 +377,31 @@ const createFavEvent = async (req, res) => {
       {
         $addToSet: { listFavoriteEvent: [addEvent] },
       },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "add succesufully", userToUpdate });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-const removeFromListFavoriteEvent = async(req,res)=>{
+const removeFromListFavoriteEvent = async (req, res) => {
   try {
     const eventId = req.body.id;
 
     const removeEvent = await Event.findById(eventId);
-    
+
     if (!removeHotel) {
       res.status(404).json({ error: "event not found" });
       return;
     }
     const userToUpdate = await User.findOneAndUpdate(
       {
-        _id: req.user._id
+        _id: req.user._id,
       },
       {
-        $pull: { listFavoriteEvent: eventId }
+        $pull: { listFavoriteEvent: eventId },
       },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "remove succesufully", userToUpdate });
   } catch (error) {
@@ -379,36 +430,30 @@ const createFavAgency = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-const removeFromListFavoritePage = async(req,res)=>{
+const removeFromListFavoritePage = async (req, res) => {
   try {
     const agencyId = req.body.id;
 
     const removeAgency = await PageEntreprise.findById(agencyId);
-    
+
     if (!removeAgency) {
       res.status(404).json({ error: "Page not found" });
       return;
     }
     const userToUpdate = await User.findOneAndUpdate(
       {
-        _id: req.user._id
+        _id: req.user._id,
       },
       {
-        $pull: { listFavoriteAgence: agencyId }
+        $pull: { listFavoriteAgence: agencyId },
       },
-      {new:true}
+      { new: true }
     );
     res.status(201).json({ message: "remove succesufully", userToUpdate });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-
-
-
-
 
 module.exports = {
   register,
@@ -418,12 +463,11 @@ module.exports = {
   getAllUsers,
   updateUserInfo,
   getUserInfo,
-  createFavHotel,
   createFavPack,
   createFavEvent,
   createFavAgency,
   removeFromListFavoHotel,
   removeFromListFavoPack,
   removeFromListFavoriteEvent,
-  removeFromListFavoritePage
+  removeFromListFavoritePage,
 };

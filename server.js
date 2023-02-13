@@ -8,12 +8,15 @@ const packageRouter = require('./routes/packages')
 const pageRouter = require('./routes/pageEntreprises')
 const hotelRouter = require('./routes/hotels')
 const eventRouter = require('./routes/events')
-const categoryRouter = require('./routes/categories')
+const allItemsRouter = require('./routes/allItems')
+const reviewRouter = require('./routes/ratingReview')
 
 
 const app = express()
 
 app.use(express.json())
+app.use(express.static('public'))
+
 app.use(cors({ credentials: true, origin: [process.env.WEB_APP_URL] }))
 
 app.use('/auth', userRouter)
@@ -21,28 +24,30 @@ app.use('/packs', packageRouter)
 app.use('/pages', pageRouter )
 app.use('/hotels', hotelRouter)
 app.use('/events',eventRouter)
-app.use('/category', categoryRouter)
 
-const TRAVELPLAN =[
-    {
-    _id:"1",
-    name:"Hammamet"
-    },
-    {
-        _id:"2",
-        name:"Paris"
-    }
+app.use('/all-items', allItemsRouter)
+app.use('/review-by-user', reviewRouter)
+
+// const TRAVELPLAN =[
+//     {
+//     _id:"1",
+//     name:"Hammamet"
+//     },
+//     {
+//         _id:"2",
+//         name:"Paris"
+//     }
     
-]
-app.get('/travelplan',(req,res)=>{
-    return res.json(TRAVELPLAN)
+// ]
+// app.get('/travelplan',(req,res)=>{
+//     return res.json(TRAVELPLAN)
    
-})
+// })
 
-app.get('/', (req,res)=>{
+// app.get('/', (req,res)=>{
    
-    res.json({message: "Welcome to My application FunToDo "})
-})
+//     res.json({message: "Welcome to My application FunToDo "})
+// })
 
 
 const PORT = process.env.PORT|| 3000

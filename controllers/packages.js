@@ -1,5 +1,7 @@
 const Package = require("../models/Package");
 const { packageValidator } = require("../utilities/validators");
+
+
 //get all packages
 const getAllPackages = async (req, res) => {
   try {
@@ -8,7 +10,7 @@ const getAllPackages = async (req, res) => {
       model: "PageEntreprise",
       select: "title",
     });
-    res.status(201).json({ package });
+    res.status(201).json( package );
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
