@@ -8,12 +8,14 @@ const pageSchema = mongoose.Schema({
   description: {
     type: String,
   },
-  photo: {
+  image: {
     type: String,
   },
-  photos: [{
-    type:String
-  }],
+  photos: [
+    {
+      type: String,
+    },
+  ],
   contact: {
     type: Number,
     required: true,
@@ -22,9 +24,14 @@ const pageSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  admins: [{
-     type: mongoose.Schema.Types.ObjectId, 
-     ref: "User" 
-    }],
+  admins: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  cloudinary_id: {
+    type: String,
+  },
 });
 module.exports = mongoose.model("PageEntreprise", pageSchema);

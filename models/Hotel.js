@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const hotelSchema = mongoose.Schema({
-  photo: {
+  image: {
     type: String,
   },
   title: {
@@ -47,5 +47,8 @@ const hotelSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  cloudinary_id: {
+    type: String
+  }
 });
 module.exports = mongoose.model("Hotel", hotelSchema);

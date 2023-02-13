@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const packageSchema = mongoose.Schema({
-  photo: {
+  image: {
     type: String,
   },
   photos: [{
@@ -34,6 +34,9 @@ const packageSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "PageEntreprise",
   },
+  cloudinary_id: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model("Package", packageSchema);
