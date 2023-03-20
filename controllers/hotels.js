@@ -1,7 +1,7 @@
 const Hotel = require("../models/Hotel");
 const PageEntreprise = require("../models/PageEntreprise");
 const Review = require("../models/Review");
-const { hotelValidator } = require("../utilities/validators");
+const { hotelValidator, reviewValidator } = require("../utilities/validators");
 const cloudinary = require("../utilities/cloudinary");
 
 //get all Hotels
@@ -55,20 +55,16 @@ const getHotelPrice = async (req, res) => {
 };
 const getOneHotel = async (req, res) => {
   try {
-    const id  = req.params.id;
+    const id = req.params.id;
     const hotel = await Hotel.findById(id);
     const userId = req.user._id;
-    const reviewByUser = await Review.findOne({user: userId, hotel:id})
-
+    const reviewByUser = await Review.findOne({ user: userId, hotel: id });
 
     if (hotel || reviewByUser) {
-      return res.status(200).json({hotel:hotel, userReview: reviewByUser});
-    
-    }else{
+      return res.status(200).json({ hotel: hotel, userReview: reviewByUser });
+    } else {
       return res.status(404).json({ error: "Hotel not found" });
     }
-    
-  
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -81,9 +77,9 @@ const createHotel = async (req, res) => {
     if (validationResult.error) {
       res.status(400).json(validationResult);
     } else {
-      const { title, price, country, details, rooms } = req.body;
+      const { title, price, country, details, rooms, star } = req.body;
       const result = await cloudinary.uploader.upload(req.file.path);
-      
+
       const hotel = new Hotel({
         image: result.secure_url,
         title: title,
@@ -93,7 +89,7 @@ const createHotel = async (req, res) => {
         rooms: rooms,
         page: req.params.pageId,
         cloudinary_id: result.public_id,
-
+        star: star,
       });
       let savedHotel = await hotel.save();
       res.status(201).json({
@@ -115,16 +111,16 @@ const updateHotel = async (req, res) => {
     // if (validationResult.error) {
     //   return res.status(400).json(validationResult);
     // }
-    let hotelToUpadate = await Hotel.findById(hotelToUpdateId)
-    let hotelImage = hotelToUpadate.image
-    let hotelImageCloudId = hotelToUpadate.cloudinary_id
+    let hotelToUpadate = await Hotel.findById(hotelToUpdateId);
+    let hotelImage = hotelToUpadate.image;
+    let hotelImageCloudId = hotelToUpadate.cloudinary_id;
     if (req.file) {
       await cloudinary.uploader.destroy(hotelToUpadate.cloudinary_id);
       result = await cloudinary.uploader.upload(req.file.path);
       hotelImage = result.secure_url;
       hotelImageCloudId = result.public_id;
     }
-    const { title, price, country, details, rooms } = req.body;
+    const { title, price, country, details, rooms, star } = req.body;
     const data = {
       image: hotelImage,
       title,
@@ -132,11 +128,12 @@ const updateHotel = async (req, res) => {
       country,
       details,
       rooms,
-      cloudinary_id: hotelImageCloudId
-    }
+      cloudinary_id: hotelImageCloudId,
+      star,
+    };
     const hotel = await Hotel.findByIdAndUpdate(
       { _id: hotelToUpdateId },
-      data ,
+      data,
       { new: true }
     );
     if (!hotel) {
@@ -212,44 +209,47 @@ const getHotelByAgency = async (req, res) => {
 // };
 const addRatingsHotel = async (req, res) => {
   try {
-    const hotelId = req.params.id;
-    const userId = req.user._id;
-    const { note } = req.body;
-    const isReviewExist = await Review.findOne({
-      user: userId,
-      hotel: hotelId,
-    });
-    const hotelExist = await Hotel.findById(hotelId);
-
-    console.log(isReviewExist);
-    if (isReviewExist) {
-      const userReview = await Review.findOneAndUpdate(
-        {
-          user: userId,
-          hotel: hotelId,
-        },
-        { $set: { note: note } },
-        { new: true }
-      );
-      return res.status(201).json({ reviews: userReview, hotel: hotelExist });
-    } else {
-      let savedReview = await new Review({
+   
+      const hotelId = req.params.id;
+      const userId = req.user._id;
+      const { note } = req.body;
+      console.log({"n":note});
+      const isReviewExist = await Review.findOne({
         user: userId,
-        note: note,
         hotel: hotelId,
-      }).save();
-      console.log(savedReview);
-      const updatedHotel = await Hotel.findOneAndUpdate(
-        {
-          _id: hotelId,
-        },
-        {
-          $addToSet: { ratings: [savedReview] },
-        },
-        { new: true }
-      );
-      return res.status(201).json(updatedHotel);
-    }
+      });
+      const hotelExist = await Hotel.findById(hotelId);
+
+      console.log(isReviewExist);
+      if (isReviewExist) {
+        const userReview = await Review.findOneAndUpdate(
+          {
+            user: userId,
+            hotel: hotelId,
+          },
+          { $set: { note: note } },
+          { new: true }
+        );
+        return res.status(201).json({ reviews: userReview, hotel: hotelExist });
+      } else {
+        let savedReview = await new Review({
+          user: userId,
+          note: note,
+          hotel: hotelId,
+        }).save();
+        console.log(savedReview);
+        const updatedHotel = await Hotel.findOneAndUpdate(
+          {
+            _id: hotelId,
+          },
+          {
+            $addToSet: { ratings: [savedReview] },
+          },
+          { new: true }
+        );
+        return res.status(201).json(updatedHotel);
+      }
+    
 
     // const updatedHotel = await Hotel.findOneAndUpdate(
     //   {
@@ -264,14 +264,16 @@ const addRatingsHotel = async (req, res) => {
 };
 const claculateAverageRating = async (req, res) => {
   try {
-    const allReviews = await Review.find()
-    const ratingAverage = await Review.aggregate([{
-      $group: {
-        _id: "$hotel",
-        averageRate:{$avg:"$note"}
+    const allReviews = await Review.find();
+    const ratingAverage = await Review.aggregate([
+      {
+        $group: {
+          _id: "$hotel",
+          averageRate: { $avg: "$note" },
+        },
       },
-    }]);
-    res.status(200).json({moyenne:ratingAverage, data :allReviews})
+    ]);
+    res.status(200).json({ moyenne: ratingAverage, data: allReviews });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -286,5 +288,5 @@ module.exports = {
   deleteHotel,
   getHotelPrice,
   getHotelByAgency,
-  claculateAverageRating
+  claculateAverageRating,
 };

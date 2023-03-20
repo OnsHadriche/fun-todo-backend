@@ -5,6 +5,9 @@ const pageSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+  },
   description: {
     type: String,
   },
@@ -19,6 +22,9 @@ const pageSchema = mongoose.Schema({
   contact: {
     type: Number,
     required: true,
+  },
+  country:{
+    type:String
   },
   master: {
     type: mongoose.Schema.Types.ObjectId,

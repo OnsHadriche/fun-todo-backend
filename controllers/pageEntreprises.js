@@ -3,6 +3,7 @@ const Hotel = require("../models/Hotel");
 const PageEntreprise = require("../models/PageEntreprise");
 const User = require("../models/User");
 const { pageValidator } = require("../utilities/validators");
+const cloudinary = require("../utilities/cloudinary");
 
 const getAllPages = async (req, res) => {
   try {
@@ -41,14 +42,16 @@ const creatPageEntreprise = async (req, res) => {
     if (pageEntrepriseTitle) {
       return res.status(401).json({ error: "Company name already exist" });
     }
-    const { title, description, photo, contact } = req.body;
-
+    const { title, description, contact, country } = req.body;
+    const result = await cloudinary.uploader.upload(req.file.path);
     const pageEntreprise = await new PageEntreprise({
       title: title,
       description: description,
-      photo: photo,
+      image: result.secure_url,
       contact: contact,
       master: req.user._id,
+      country: country,
+      cloudinary_id: result.public_id,
     });
     const savedPage = await pageEntreprise.save();
     req.user.password = undefined;
@@ -164,5 +167,4 @@ module.exports = {
   getOnePage,
   removePageEntreprise,
   removeAdmin,
-
 };

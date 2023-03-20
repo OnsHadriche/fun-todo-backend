@@ -7,7 +7,7 @@ const ReviewSchema = mongoose.Schema({
   },
   note: {
     type: Number,
-    default: 0,
+    default:0
   },
   hotel:{
     type: mongoose.Schema.Types.ObjectId,

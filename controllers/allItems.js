@@ -13,7 +13,7 @@ const getAllItems = async (req, res) => {
     const events = await Event.find().populate([
       { path: "user", model: "User", select: "firstName lastName" },
       { path: "page", model: "PageEntreprise", select: "title" },
-      { path: "category", model: "Category", select: "name" },
+      
     ]);
     const hotels = await Hotel.find().populate({
       path: "page",

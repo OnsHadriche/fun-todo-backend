@@ -11,7 +11,6 @@ const getAllEvents = async (req, res) => {
     const events = await Event.find().populate([
       { path: "user", model: "User", select: "firstName lastName" },
       { path: "page", model: "PageEntreprise", select: "title" },
-      { path: "category", model: "Category", select: "name" },
     ]);
 
     res.status(201).json(events);

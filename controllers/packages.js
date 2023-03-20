@@ -52,12 +52,10 @@ const getPackagePrice = async (req, res) => {
 };
 const getOnePackage = async (req, res) => {
   try {
-    const { id } = req.params.id;
-    const package = await Package.findById(id).populate({
-      path: "page",
-      model: "PageEntreprise",
-      select: "title",
-    });
+    const id = req.params.id;
+    
+    console.log(id)
+    const package = await Package.findById(id)
     if (!package) {
       return res.status(404).json({ error: "Package not found" });
     }

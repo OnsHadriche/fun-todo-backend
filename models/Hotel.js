@@ -34,10 +34,18 @@ const hotelSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  ratings: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref:"Review"
-  }],
+  ratings: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+    },
+  ],
+  star: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5
+  },
 
   page: {
     type: mongoose.Schema.Types.ObjectId,
@@ -48,7 +56,7 @@ const hotelSchema = mongoose.Schema({
     default: Date.now,
   },
   cloudinary_id: {
-    type: String
-  }
+    type: String,
+  },
 });
 module.exports = mongoose.model("Hotel", hotelSchema);
